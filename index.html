@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin mã phiếu</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            box-sizing: border-box;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        p i {
+            font-size: 16px;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 20px;
+        }
+
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+
+            .content {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+
+            img {
+                page-break-before: always;
+            }
+        }
+
+        .bordered-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .bordered-table th,
+        .bordered-table td {
+            border: none;
+        }
+
+        .bordered-table th {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .bordered-table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+    <script>
+        function getCustomQueryParam(param) {
+            const queryString = window.location.href.split('?').slice(1);
+            for (let part of queryString) {
+                const [key, value] = part.split('=');
+                if (key === param) {
+                    return decodeURIComponent(value || '');
+                }
+            }
+            return null;
+        }
+
+        function extractDay(dateString) {
+            if (!dateString) return '';
+            const parts = dateString.split('/');
+            return parts.length > 0 ? parts[0] : '';
+        }
+
+        function getValuesBetweenMarkers(input, startMarker, endMarker) {
+            const regex = new RegExp(`${startMarker}(.*?)${endMarker}`, 'g');
+            let matches = [];
+            let match;
+            while ((match = regex.exec(input)) !== null) {
+                const tempString = match[1];
+                const innerMatches = tempString.split('@');
+                matches.push(...innerMatches);
+            }
+            return matches;
+        }
+
+        // Hàm xử lý số: chuyển đổi từ dạng "2,000" sang dạng bỏ "0" sau dấu thập phân
+        function formatNumber(numberString) {
+            if (!numberString) return '';
+            // Thay dấu phẩy bằng dấu chấm, nếu là số thập phân
+            const num = numberString.replace(',', '.');
+            // Chuyển về dạng số rồi lại chuyển về chuỗi để loại bỏ phần thập phân không cần thiết
+            const formatted = parseFloat(num).toString();
+            // Đổi lại dấu chấm thành dấu phẩy nếu cần
+            return formatted.replace('.', ',');
+        }
+
+        window.onload = function () {
+            const maPhieuXuat = getCustomQueryParam('ma_phieu_xuat') || '';
+            const xuongSanXuat = getCustomQueryParam('xuong_sx') || '';
+            const ngayXuat = extractDay(getCustomQueryParam('ngay_xuat')) || '';
+            const thangXuat = getCustomQueryParam('thang_xuat') || '';
+            const namXuat = getCustomQueryParam('nam_xuat') || '';
+            const xuatTaiKho = getCustomQueryParam('xuat_tai_kho') || '';
+            const nhapTaiKho = getCustomQueryParam('nhap_tai_kho') || '';
+            const ghiChu = getCustomQueryParam('ghi_chu') || '.........................................................................................................................................................';
+
+            document.getElementById('maPhieuXuat').innerText = maPhieuXuat;
+            document.getElementById('xuongSanXuat').innerText = xuongSanXuat;
+            document.getElementById('ngayXuat').innerText = ngayXuat;
+            document.getElementById('thangXuat').innerText = thangXuat;
+            document.getElementById('namXuat').innerText = namXuat;
+            document.getElementById('xuatTaiKho').innerText = xuatTaiKho;
+            document.getElementById('nhapTaiKho').innerText = nhapTaiKho;
+            document.getElementById('ghiChu').innerText = ghiChu;
+
+            const tableBody = document.getElementById('itemTableBody');
+            const inputString = window.location.href;
+
+            const sttTrongdon = getValuesBetweenMarkers(inputString, '~stt_trong_don~', '~stt_trong_don~');
+            const maVattu = getValuesBetweenMarkers(inputString, '~ma_vat_tu~', '~ma_vat_tu~');
+            const tenVattu = getValuesBetweenMarkers(inputString, '~ten_vat_tu~', '~ten_vat_tu~');
+            const dvt = getValuesBetweenMarkers(inputString, '~dvt~', '~dvt~');
+            const slXuat = getValuesBetweenMarkers(inputString, '~sl_xuat~', '~sl_xuat~');
+            const dvtQuydoi = getValuesBetweenMarkers(inputString, '~dvt_quy_doi~', '~dvt_quy_doi~');
+            const slXuatQuydoi = getValuesBetweenMarkers(inputString, '~sl_xuat_quy_doi~', '~sl_xuat_quy_doi~');
+            const vitriKehang = getValuesBetweenMarkers(inputString, '~vi_tri_ke_hang~', '~vi_tri_ke_hang~');
+            const ghiChuItem = getValuesBetweenMarkers(inputString, '~ghi_chu~', '~ghi_chu~');
+
+            const itemCount = Math.max(
+                sttTrongdon.length,
+                maVattu.length,
+                tenVattu.length,
+                dvt.length,
+                slXuat.length,
+                dvtQuydoi.length,
+                slXuatQuydoi.length,
+                vitriKehang.length,
+                ghiChuItem.length
+            );
+
+            // Tạo mảng các đối tượng để sắp xếp theo sttTrongdon
+            let items = [];
+            for (let i = 0; i < itemCount; i++) {
+                items.push({
+                    stt: sttTrongdon[i] || '',
+                    maVattu: decodeURIComponent(maVattu[i] || ''),
+                    tenVattu: decodeURIComponent(tenVattu[i] || ''),
+                    dvt: decodeURIComponent(dvt[i] || ''),
+                    slXuat: formatNumber(slXuat[i] || ''),
+                    dvtQuydoi: decodeURIComponent(dvtQuydoi[i] || ''),
+                    slXuatQuydoi: formatNumber(slXuatQuydoi[i] || ''),
+                    vitriKehang: decodeURIComponent(vitriKehang[i] || ''),
+                    ghiChuItem: decodeURIComponent(ghiChuItem[i] || '')
+                });
+            }
+
+            // Sắp xếp mảng theo stt
+            items.sort((a, b) => {
+                return a.stt - b.stt;
+            });
+
+            // Hiển thị lại các dòng sau khi sắp xếp
+            for (let item of items) {
+                tableBody.innerHTML += `
+            <tr>
+                <td><span>${item.stt}</span></td>
+                <td><span>${item.maVattu}</span></td>
+                <td><span>${item.tenVattu}</span></td>
+                <td style="text-align: center"><span>${item.dvt}</span></td>
+                <td style="text-align: right"><span>${item.slXuat}</span></td>
+                <td style="text-align: center"><span>${item.dvtQuydoi}</span></td>
+                <td style="text-align: right"><span>${item.slXuatQuydoi}</span></td>
+                <td style="text-align: center"><span>${item.vitriKehang}</span></td>
+                <td><span>${item.ghiChuItem}</span></td>
+            </tr>
+        `;
+            }
+        };
+    </script>
+
+</head>
+
+<body>
+    <div class="content">
+        <img src="https://i.imgur.com/vfwvNd4.jpg" alt="Mô tả hình ảnh">
+        <h2 style="text-align: center">PHIẾU ĐỀ XUẤT CHUYỂN KHO</h2>
+        <p style="text-align: center">(Mã phiếu đề xuất số: <span id="maPhieuXuat">Đang tải...</span>)</p>
+        <p style="text-align: right"><i>Xưởng <span id="xuongSanXuat">Đang tải...</span>,
+                Ngày <span id="ngayXuat">Đang tải...</span>
+                <span id="thangXuat">Đang tải...</span>
+                <span id="namXuat">Đang tải...</span></i></p>
+        <table>
+            <tbody>
+                <tr style="line-height: 24px;">
+                    <td><i>Xuất tại kho</i></td>
+                    <td><i>:</i></td>
+                    <td><i><span id="xuatTaiKho">Đang tải...</span></i></td>
+                </tr>
+                <tr style="line-height: 24px;">
+                    <td><i>Nhập tại kho</i></td>
+                    <td><i>:</i></td>
+                    <td><i><span id="nhapTaiKho">Đang tải...</span></i></td>
+                </tr>
+                <tr style="line-height: 24px;">
+                    <td><i>Diễn giải</i></td>
+                    <td><i>:</i></td>
+                    <td><i><span id="ghiChu">Đang tải...</span></i></td>
+                </tr>
+                <tr style="line-height: 24px;">
+                    <td><i></i></td>
+                    <td><i></i></td>
+                    <td><i>.........................................................................................................................................................</i>
+                    </td>
+                </tr>
+                <tr style="line-height: 24px;">
+                    <td><i></i></td>
+                    <td><i></i></td>
+                    <td><i>.........................................................................................................................................................</i>
+                    </td>
+                </tr>
+                <tr style="line-height: 24px;">
+                    <td><i></i></td>
+                    <td><i></i></td>
+                    <td><i>.........................................................................................................................................................</i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="bordered-table">
+            <thead>
+                <tr>
+                    <th style="text-align: center">STT</th>
+                    <th style="text-align: center">Mã hàng</th>
+                    <th style="text-align: center">Tên hàng</th>
+                    <th style="text-align: center">ĐVT</th>
+                    <th style="text-align: center">Số lượng</th>
+                    <th style="text-align: center">ĐVT quy đổi</th>
+                    <th style="text-align: center">Số lượng</th>
+                    <th style="text-align: center">Vị trí kệ hàng</th>
+                    <th style="text-align: center">Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody id="itemTableBody">
+                <!-- Rows will be added dynamically here -->
+            </tbody>
+        </table>
+        <table style="width: 100%; margin-top: 16px;">
+            <tbody>
+                <tr style="text-align: center">
+                    <td style="width: 33.33%;"><b>Người đề xuất</b><br><i>(ký, ghi rõ họ tên)</i></td>
+                    <td style="width: 33.33%;"><b>Thủ kho</b><br><i>(ký, ghi rõ họ tên)</i></td>
+                    <td style="width: 33.33%;"><b>Người nhận hàng</b><br><i>(ký, ghi rõ họ tên)</i></td>
+                </tr>
+                <tr style="text-align: center">
+                    <td style="width: 33.33%; height: 100px;"></td>
+                    <td style="width: 33.33%; height: 100px;"></td>
+                    <td style="width: 33.33%; height: 100px;"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
