@@ -136,6 +136,20 @@
             return formatted.replace('.', ',');
         }
 
+        function removeTrailingZeros(input) {
+            // Thay dấu phẩy (,) thành dấu chấm (.) để chuẩn hóa
+            let normalized = input.replace(',', '.');
+
+            // Loại bỏ các số 0 cuối cùng sau dấu thập phân, nếu có
+            normalized = normalized.replace(/(\.\d*?)0+$/, '$1');
+
+            // Nếu chỉ còn dấu chấm sau khi loại bỏ 0, loại bỏ luôn dấu chấm
+            normalized = normalized.replace(/\.$/, '');
+
+            // Khôi phục định dạng dấu phẩy ban đầu
+            return normalized.replace('.', ',');
+        }
+
         window.onload = function () {
             const maPhieuXuat = getCustomQueryParam('ma_phieu_xuat') || '';
             const xuongSanXuat = getCustomQueryParam('xuong_sx') || '';
@@ -188,9 +202,9 @@
                     maVattu: decodeURIComponent(maVattu[i] || ''),
                     tenVattu: decodeURIComponent(tenVattu[i] || ''),
                     dvt: decodeURIComponent(dvt[i] || ''),
-                    slXuat: formatNumber(slXuat[i] || ''),
+                    slXuat: removeTrailingZeros(slXuat[i] || ''),
                     dvtQuydoi: decodeURIComponent(dvtQuydoi[i] || ''),
-                    slXuatQuydoi: formatNumber(slXuatQuydoi[i] || ''),
+                    slXuatQuydoi: removeTrailingZeros(slXuatQuydoi[i] || ''),
                     vitriKehang: decodeURIComponent(vitriKehang[i] || ''),
                     ghiChuItem: decodeURIComponent(ghiChuItem[i] || '')
                 });
